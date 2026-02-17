@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta Dermatológica - Anamnese e Exame Físico</title>
+    <title>Consulta Dermatológica - Sistema Especialista</title>
     <style>
         * {
             margin: 0;
@@ -109,12 +109,18 @@
             flex-wrap: wrap;
             gap: 15px;
             margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
         }
 
         .checkbox-item {
             display: flex;
             align-items: center;
             gap: 8px;
+            min-width: 200px;
         }
 
         .checkbox-item input[type="checkbox"] {
@@ -185,19 +191,6 @@
             white-space: pre-wrap;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .badge-info {
-            background: #3498db;
-            color: white;
-        }
-
         .imc-result {
             font-size: 18px;
             padding: 10px;
@@ -208,23 +201,6 @@
         .imc-normal { background: #c8e6c9; color: #1b5e20; }
         .imc-sobrepeso { background: #fff9c4; color: #ff6f00; }
         .imc-obesidade { background: #ffcdd2; color: #b71c1c; }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 15px 0;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        th {
-            background: #f7fafc;
-            font-weight: 600;
-        }
 
         .medicamento-item {
             background: #f7fafc;
@@ -257,6 +233,15 @@
             margin-bottom: 15px;
         }
 
+        .hd-display {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 6px solid #1976d2;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
         footer {
             text-align: center;
             margin-top: 40px;
@@ -267,8 +252,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>📋 Consulta Dermatológica - Anamnese e Exame Físico</h1>
-        <p style="margin-bottom: 20px; color: #4a5568;">Baseado nos documentos: Roteiro Detalhado, E-book Semiologia e Capítulo 9</p>
+        <h1>📋 Consulta Dermatológica - Sistema Especialista</h1>
+        <p style="margin-bottom: 20px; color: #4a5568;">Baseado em guidelines da SBD e literatura médica</p>
 
         <!-- Identificação e Dados Básicos -->
         <div class="card">
@@ -291,7 +276,7 @@
                 </div>
                 <div class="form-group">
                     <label>Sexo</label>
-                    <select id="sexo">
+                    <select id="sexo" onchange="gerarHDeConduta()">
                         <option value="">Selecione</option>
                         <option value="Feminino">Feminino</option>
                         <option value="Masculino">Masculino</option>
@@ -307,17 +292,6 @@
                 </div>
             </div>
             
-            <div class="grid-2">
-                <div class="form-group">
-                    <label>Profissão</label>
-                    <input type="text" id="profissao" placeholder="Ex: Cabelereira, Pedreiro...">
-                </div>
-                <div class="form-group">
-                    <label>Procedência</label>
-                    <input type="text" id="procedencia" placeholder="Cidade/Estado">
-                </div>
-            </div>
-            
             <div id="imcDisplay" class="imc-result" style="display:none;"></div>
         </div>
 
@@ -326,63 +300,87 @@
             <h2>2. Queixa Principal</h2>
             <div class="form-group">
                 <label>"O que mais incomoda o(a) senhor(a) na pele?"</label>
-                <textarea id="queixa" placeholder="Ex: Manchas vermelhas que coçam há 2 meses..."></textarea>
+                <textarea id="queixa" placeholder="Ex: Manchas vermelhas que coçam há 2 meses..." onchange="gerarHDeConduta()"></textarea>
             </div>
         </div>
 
-        <!-- História Prévia e Medicamentos -->
-        <div class="grid-2">
-            <div class="card">
-                <h2>3. História Prévia</h2>
-                <div class="form-group">
-                    <label>Antecedentes Pessoais Dermatológicos</label>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item"><input type="checkbox" value="Acne"> Acne</div>
-                        <div class="checkbox-item"><input type="checkbox" value="Psoríase"> Psoríase</div>
-                        <div class="checkbox-item"><input type="checkbox" value="Dermatite atópica"> Dermatite atópica</div>
-                        <div class="checkbox-item"><input type="checkbox" value="Hanseníase"> Hanseníase</div>
-                        <div class="checkbox-item"><input type="checkbox" value="Vitiligo"> Vitiligo</div>
+        <!-- História Prévia -->
+        <div class="card">
+            <h2>3. História Prévia</h2>
+            <div class="grid-2">
+                <div>
+                    <h3>Antecedentes Dermatológicos</h3>
+                    <div class="checkbox-group" id="dermatologicos">
+                        <div class="checkbox-item"><input type="checkbox" value="Acne" onchange="gerarHDeConduta()"> Acne</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Psoríase" onchange="gerarHDeConduta()"> Psoríase</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Dermatite atópica" onchange="gerarHDeConduta()"> Dermatite atópica</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Hanseníase" onchange="gerarHDeConduta()"> Hanseníase</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Vitiligo" onchange="gerarHDeConduta()"> Vitiligo</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Melasma" onchange="gerarHDeConduta()"> Melasma</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Rosácea" onchange="gerarHDeConduta()"> Rosácea</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Dermatite seborreica" onchange="gerarHDeConduta()"> Dermatite seborreica</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Câncer de pele" onchange="gerarHDeConduta()"> Câncer de pele</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Ceratose actínica" onchange="gerarHDeConduta()"> Ceratose actínica</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Lúpus cutâneo" onchange="gerarHDeConduta()"> Lúpus cutâneo</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Escabiose" onchange="gerarHDeConduta()"> Escabiose</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Micoses" onchange="gerarHDeConduta()"> Micoses</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Alopecia areata" onchange="gerarHDeConduta()"> Alopecia areata</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Urticária" onchange="gerarHDeConduta()"> Urticária</div>
                     </div>
                 </div>
                 
-                <div class="form-group">
-                    <label>Antecedentes Clínicos</label>
-                    <div class="checkbox-group">
-                        <div class="checkbox-item"><input type="checkbox" value="Diabetes"> Diabetes</div>
-                        <div class="checkbox-item"><input type="checkbox" value="HAS"> HAS</div>
-                        <div class="checkbox-item"><input type="checkbox" value="Dislipidemia"> Dislipidemia</div>
-                        <div class="checkbox-item"><input type="checkbox" value="Doença autoimune"> Doença autoimune</div>
+                <div>
+                    <h3>Antecedentes Clínicos</h3>
+                    <div class="checkbox-group" id="clinicos">
+                        <div class="checkbox-item"><input type="checkbox" value="Diabetes mellitus" onchange="gerarHDeConduta()"> Diabetes mellitus</div>
+                        <div class="checkbox-item"><input type="checkbox" value="HAS" onchange="gerarHDeConduta()"> HAS</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Dislipidemia" onchange="gerarHDeConduta()"> Dislipidemia</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Hipotireoidismo" onchange="gerarHDeConduta()"> Hipotireoidismo</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Hipertireoidismo" onchange="gerarHDeConduta()"> Hipertireoidismo</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Doença autoimune" onchange="gerarHDeConduta()"> Doença autoimune</div>
+                        <div class="checkbox-item"><input type="checkbox" value="HIV" onchange="gerarHDeConduta()"> HIV</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Hepatites" onchange="gerarHDeConduta()"> Hepatites</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Insuficiência renal" onchange="gerarHDeConduta()"> Insuficiência renal</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Neoplasias" onchange="gerarHDeConduta()"> Neoplasias</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Artrite reumatoide" onchange="gerarHDeConduta()"> Artrite reumatoide</div>
+                        <div class="checkbox-item"><input type="checkbox" value="Lúpus eritematoso" onchange="gerarHDeConduta()"> Lúpus eritematoso</div>
                     </div>
                 </div>
-                
+            </div>
+            
+            <div class="grid-2">
                 <div class="form-group">
                     <label>Alergias</label>
-                    <input type="text" id="alergias" placeholder="Medicamentosas, alimentares, cosméticos...">
+                    <input type="text" id="alergias" placeholder="Medicamentosas, alimentares, cosméticos..." onchange="gerarHDeConduta()">
                 </div>
-                
                 <div class="form-group">
-                    <label>Histórico de Exposição Solar</label>
-                    <input type="text" id="exposicaoSolar" placeholder="Frequência, uso de protetor, queimaduras...">
-                </div>
-                
-                <div class="form-group">
-                    <label>Hábitos</label>
-                    <input type="text" id="habitos" placeholder="Tabagismo, etilismo, cosméticos...">
+                    <label>Hábitos de Vida</label>
+                    <select id="habitos" onchange="gerarHDeConduta()">
+                        <option value="">Selecione os hábitos</option>
+                        <option value="Tabagista">Tabagista</option>
+                        <option value="Etilista social">Etilista social</option>
+                        <option value="Etilista pesado">Etilista pesado</option>
+                        <option value="Sedentário">Sedentário</option>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Uso de drogas ilícitas">Uso de drogas ilícitas</option>
+                        <option value="Sem hábitos relevantes">Sem hábitos relevantes</option>
+                    </select>
                 </div>
             </div>
+        </div>
 
-            <div class="card">
-                <h2>4. Medicamentos em Uso</h2>
-                <div id="medicamentos-container">
-                    <div class="medicamento-item">
-                        <input type="text" placeholder="Nome" class="med-nome">
-                        <input type="text" placeholder="Dose" class="med-dose">
-                        <input type="text" placeholder="Tempo de uso" class="med-tempo">
-                        <input type="text" placeholder="Indicação" class="med-indicacao">
-                    </div>
+        <!-- Medicamentos -->
+        <div class="card">
+            <h2>4. Medicamentos em Uso</h2>
+            <div id="medicamentos-container">
+                <div class="medicamento-item">
+                    <input type="text" placeholder="Nome" class="med-nome" onchange="gerarHDeConduta()">
+                    <input type="text" placeholder="Dose" class="med-dose" onchange="gerarHDeConduta()">
+                    <input type="text" placeholder="Tempo de uso" class="med-tempo" onchange="gerarHDeConduta()">
+                    <input type="text" placeholder="Indicação" class="med-indicacao" onchange="gerarHDeConduta()">
                 </div>
-                <button class="btn" onclick="adicionarMedicamento()">+ Adicionar Medicamento</button>
             </div>
+            <button class="btn" onclick="adicionarMedicamento()">+ Adicionar Medicamento</button>
         </div>
 
         <!-- História da Doença Atual -->
@@ -390,74 +388,71 @@
             <h2>5. História da Doença Atual (HDA)</h2>
             <div class="grid-3">
                 <div class="form-group">
-                    <label>Início</label>
-                    <select id="inicio">
-                        <option value="">Selecione</option>
-                        <option value="súbito">Súbito</option>
-                        <option value="insidioso">Insidioso</option>
-                    </select>
+                    <label>Tempo de evolução</label>
+                    <input type="text" id="tempoEvolucao" placeholder="Ex: 2 meses, 1 semana..." onchange="gerarHDeConduta()">
                 </div>
                 <div class="form-group">
-                    <label>Evolução</label>
-                    <select id="evolucao">
-                        <option value="">Selecione</option>
-                        <option value="aumento do número">Aumento do número</option>
-                        <option value="aumento do tamanho">Aumento do tamanho</option>
-                        <option value="migração">Migração</option>
-                    </select>
+                    <label>Início</label>
+                    <input type="text" id="inicio" placeholder="Descreva o início" onchange="gerarHDeConduta()">
                 </div>
                 <div class="form-group">
                     <label>Localização inicial</label>
-                    <input type="text" id="localInicial">
+                    <input type="text" id="localInicial" placeholder="Onde surgiu primeiro?" onchange="gerarHDeConduta()">
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Sintomas Associados</label>
-                <div class="checkbox-group">
-                    <div class="checkbox-item"><input type="checkbox" value="prurido"> Prurido</div>
-                    <div class="checkbox-item"><input type="checkbox" value="dor"> Dor</div>
-                    <div class="checkbox-item"><input type="checkbox" value="ardor"> Ardor</div>
-                    <div class="checkbox-item"><input type="checkbox" value="descamação"> Descamação</div>
-                    <div class="checkbox-item"><input type="checkbox" value="sangramento"> Sangramento</div>
-                    <div class="checkbox-item"><input type="checkbox" value="secreção"> Secreção</div>
-                    <div class="checkbox-item"><input type="checkbox" value="febre"> Febre</div>
-                    <div class="checkbox-item"><input type="checkbox" value="mal-estar"> Mal-estar</div>
-                </div>
+            <h3>Sintomas Associados</h3>
+            <div class="checkbox-group" id="sintomas">
+                <div class="checkbox-item"><input type="checkbox" value="prurido intenso" onchange="gerarHDeConduta()"> Prurido intenso</div>
+                <div class="checkbox-item"><input type="checkbox" value="prurido leve" onchange="gerarHDeConduta()"> Prurido leve</div>
+                <div class="checkbox-item"><input type="checkbox" value="dor" onchange="gerarHDeConduta()"> Dor</div>
+                <div class="checkbox-item"><input type="checkbox" value="ardor" onchange="gerarHDeConduta()"> Ardor</div>
+                <div class="checkbox-item"><input type="checkbox" value="queimação" onchange="gerarHDeConduta()"> Queimação</div>
+                <div class="checkbox-item"><input type="checkbox" value="descamação" onchange="gerarHDeConduta()"> Descamação</div>
+                <div class="checkbox-item"><input type="checkbox" value="sangramento" onchange="gerarHDeConduta()"> Sangramento</div>
+                <div class="checkbox-item"><input type="checkbox" value="secreção" onchange="gerarHDeConduta()"> Secreção</div>
+                <div class="checkbox-item"><input type="checkbox" value="febre" onchange="gerarHDeConduta()"> Febre</div>
+                <div class="checkbox-item"><input type="checkbox" value="mal-estar" onchange="gerarHDeConduta()"> Mal-estar</div>
+                <div class="checkbox-item"><input type="checkbox" value="artralgia" onchange="gerarHDeConduta()"> Artralgia</div>
+                <div class="checkbox-item"><input type="checkbox" value="adenomegalia" onchange="gerarHDeConduta()"> Adenomegalia</div>
             </div>
 
-            <div class="form-group">
-                <label>Fatores de melhora/piora</label>
-                <div class="checkbox-group">
-                    <div class="checkbox-item"><input type="checkbox" value="sol"> Sol</div>
-                    <div class="checkbox-item"><input type="checkbox" value="calor"> Calor</div>
-                    <div class="checkbox-item"><input type="checkbox" value="frio"> Frio</div>
-                    <div class="checkbox-item"><input type="checkbox" value="banho"> Banho</div>
-                    <div class="checkbox-item"><input type="checkbox" value="sabão"> Sabão</div>
-                    <div class="checkbox-item"><input type="checkbox" value="roupas"> Roupas</div>
-                    <div class="checkbox-item"><input type="checkbox" value="estresse"> Estresse</div>
-                    <div class="checkbox-item"><input type="checkbox" value="alimentos"> Alimentos</div>
+            <div class="grid-2">
+                <div>
+                    <h3>Fatores de Melhora</h3>
+                    <div class="checkbox-group" id="melhora">
+                        <div class="checkbox-item"><input type="checkbox" value="repouso" onchange="gerarHDeConduta()"> Repouso</div>
+                        <div class="checkbox-item"><input type="checkbox" value="hidratação" onchange="gerarHDeConduta()"> Hidratação</div>
+                        <div class="checkbox-item"><input type="checkbox" value="corticoides" onchange="gerarHDeConduta()"> Corticoides</div>
+                        <div class="checkbox-item"><input type="checkbox" value="anti-histamínicos" onchange="gerarHDeConduta()"> Anti-histamínicos</div>
+                        <div class="checkbox-item"><input type="checkbox" value="clima frio" onchange="gerarHDeConduta()"> Clima frio</div>
+                        <div class="checkbox-item"><input type="checkbox" value="clima úmido" onchange="gerarHDeConduta()"> Clima úmido</div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>Fatores de Piora</h3>
+                    <div class="checkbox-group" id="piora">
+                        <div class="checkbox-item"><input type="checkbox" value="estresse" onchange="gerarHDeConduta()"> Estresse</div>
+                        <div class="checkbox-item"><input type="checkbox" value="exposição solar" onchange="gerarHDeConduta()"> Exposição solar</div>
+                        <div class="checkbox-item"><input type="checkbox" value="calor" onchange="gerarHDeConduta()"> Calor</div>
+                        <div class="checkbox-item"><input type="checkbox" value="frio" onchange="gerarHDeConduta()"> Frio</div>
+                        <div class="checkbox-item"><input type="checkbox" value="banho quente" onchange="gerarHDeConduta()"> Banho quente</div>
+                        <div class="checkbox-item"><input type="checkbox" value="sabonetes" onchange="gerarHDeConduta()"> Sabonetes</div>
+                        <div class="checkbox-item"><input type="checkbox" value="tecidos sintéticos" onchange="gerarHDeConduta()"> Tecidos sintéticos</div>
+                        <div class="checkbox-item"><input type="checkbox" value="alimentos" onchange="gerarHDeConduta()"> Alimentos</div>
+                        <div class="checkbox-item"><input type="checkbox" value="álcool" onchange="gerarHDeConduta()"> Álcool</div>
+                        <div class="checkbox-item"><input type="checkbox" value="medicamentos" onchange="gerarHDeConduta()"> Medicamentos</div>
+                        <div class="checkbox-item"><input type="checkbox" value="suor" onchange="gerarHDeConduta()"> Suor</div>
+                        <div class="checkbox-item"><input type="checkbox" value="atrito" onchange="gerarHDeConduta()"> Atrito</div>
+                    </div>
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Tratamentos prévios realizados</label>
-                <textarea id="tratamentosPrevios" placeholder="Pomadas, corticoides, antifúngicos..."></textarea>
+                <textarea id="tratamentosPrevios" placeholder="Pomadas, corticoides, antifúngicos..." onchange="gerarHDeConduta()"></textarea>
             </div>
-            
-            <div class="form-group">
-                <label>Recorrência</label>
-                <input type="text" id="recorrencia" placeholder="Já teve lesões semelhantes antes?">
-            </div>
-            
-            <div class="form-group">
-                <label>Contato/Casos na família</label>
-                <input type="text" id="contatoFamiliar" placeholder="Outros casos no domicílio?">
-            </div>
-
-            <button class="btn btn-success" onclick="gerarHDA()">🤖 Gerar HDA Automática</button>
-            
-            <div id="hdaGerada" class="hda-display" style="display:none;"></div>
         </div>
 
         <!-- Exame Físico Dermatológico -->
@@ -468,33 +463,43 @@
             <div class="grid-2">
                 <div class="form-group">
                     <label>Cor da pele</label>
-                    <input type="text" id="corPele" placeholder="Branca, parda, negra...">
+                    <select id="corPele" onchange="gerarHDeConduta()">
+                        <option value="">Selecione</option>
+                        <option value="Branca">Branca</option>
+                        <option value="Parda">Parda</option>
+                        <option value="Negra">Negra</option>
+                        <option value="Amarela">Amarela</option>
+                        <option value="Albina">Albina</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Textura</label>
-                    <select id="textura">
+                    <select id="textura" onchange="gerarHDeConduta()">
                         <option value="">Selecione</option>
                         <option value="normal">Normal</option>
                         <option value="áspera">Áspera</option>
                         <option value="lisa">Lisa</option>
                         <option value="enrugada">Enrugada</option>
+                        <option value="acerinada">Acerinada</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Hidratação</label>
-                    <select id="hidratacao">
+                    <select id="hidratacao" onchange="gerarHDeConduta()">
                         <option value="">Selecione</option>
                         <option value="normal">Normal</option>
                         <option value="xerótica">Xerótica (seca)</option>
                         <option value="sudorenta">Sudorenta</option>
+                        <option value="descamativa">Descamativa</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Elasticidade/Turgor</label>
-                    <select id="turgor">
+                    <select id="turgor" onchange="gerarHDeConduta()">
                         <option value="">Selecione</option>
                         <option value="normal">Normal</option>
                         <option value="diminuído">Diminuído</option>
+                        <option value="aumentado">Aumentado</option>
                     </select>
                 </div>
             </div>
@@ -505,7 +510,7 @@
                     <div class="grid-2">
                         <div class="form-group">
                             <label>Tipo de lesão</label>
-                            <select class="tipo-lesao">
+                            <select class="tipo-lesao" onchange="gerarHDeConduta()">
                                 <option value="">Selecione</option>
                                 <optgroup label="Conteúdo Líquido">
                                     <option value="vesícula">Vesícula (&lt;1cm)</option>
@@ -519,8 +524,11 @@
                                     <option value="mácula eritematosa">Mácula eritematosa</option>
                                     <option value="mácula hipocrômica">Mácula hipocrômica</option>
                                     <option value="mácula hipercrômica">Mácula hipercrômica</option>
+                                    <option value="mácula acrômica">Mácula acrômica</option>
                                     <option value="púrpura">Púrpura</option>
+                                    <option value="equimose">Equimose</option>
                                     <option value="telangiectasia">Telangiectasia</option>
+                                    <option value="mancha angiomatosa">Mancha angiomatosa</option>
                                 </optgroup>
                                 <optgroup label="Lesões Sólidas">
                                     <option value="pápula">Pápula (&lt;1cm)</option>
@@ -534,13 +542,17 @@
                                 </optgroup>
                                 <optgroup label="Lesões Secundárias">
                                     <option value="atrofia">Atrofia</option>
-                                    <option value="cicatriz">Cicatriz</option>
+                                    <option value="cicatriz hipertrófica">Cicatriz hipertrófica</option>
+                                    <option value="cicatriz atrófica">Cicatriz atrófica</option>
                                     <option value="liquenificação">Liquenificação</option>
                                     <option value="queratose">Queratose</option>
-                                    <option value="crosta">Crosta</option>
+                                    <option value="crosta hemática">Crosta hemática</option>
+                                    <option value="crosta serosa">Crosta serosa</option>
+                                    <option value="crosta purulenta">Crosta purulenta</option>
                                     <option value="erosão">Erosão/Exulceração</option>
                                     <option value="úlcera">Úlcera</option>
-                                    <option value="escama">Escama</option>
+                                    <option value="escama furfurácea">Escama furfurácea</option>
+                                    <option value="escama laminar">Escama laminar</option>
                                     <option value="escara">Escara</option>
                                     <option value="fissura">Fissura/Rágade</option>
                                     <option value="fístula">Fístula</option>
@@ -549,26 +561,84 @@
                         </div>
                         <div class="form-group">
                             <label>Cor</label>
-                            <input type="text" class="cor-lesao" placeholder="Eritematosa, violácea, acastanhada...">
+                            <select class="cor-lesao" onchange="gerarHDeConduta()">
+                                <option value="">Selecione</option>
+                                <option value="eritematosa">Eritematosa</option>
+                                <option value="violácea">Violácea</option>
+                                <option value="acastanhada">Acastanhada</option>
+                                <option value="hipocrômica">Hipocrômica</option>
+                                <option value="hipercrômica">Hipercrômica</option>
+                                <option value="acrômica">Acrômica</option>
+                                <option value="amarelada">Amarelada</option>
+                                <option value="esbranquiçada">Esbranquiçada</option>
+                                <option value="acinzentada">Acizinzentada</option>
+                                <option value="enegrecida">Enegrecida</option>
+                                <option value="púrpura">Púrpura</option>
+                                <option value="cianótica">Cianótica</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label>Forma</label>
-                            <input type="text" class="forma-lesao" placeholder="Circular, anular, linear, irregular">
+                            <select class="forma-lesao" onchange="gerarHDeConduta()">
+                                <option value="">Selecione</option>
+                                <option value="circular">Circular</option>
+                                <option value="anular">Anular</option>
+                                <option value="anelar">Anelar</option>
+                                <option value="policíclica">Policíclica</option>
+                                <option value="linear">Linear</option>
+                                <option value="arciforme">Arciforme</option>
+                                <option value="serpiginosa">Serpiginosa</option>
+                                <option value="irregular">Irregular</option>
+                                <option value="oval">Oval</option>
+                                <option value="digitiforme">Digitiforme</option>
+                                <option value="zosteriforme">Zosteriforme</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label>Bordas</label>
-                            <select class="bordas-lesao">
+                            <select class="bordas-lesao" onchange="gerarHDeConduta()">
                                 <option value="nítidas">Nítidas</option>
                                 <option value="mal definidas">Mal definidas</option>
+                                <option value="elevadas">Elevadas</option>
+                                <option value="planas">Planas</option>
+                                <option value="regulares">Regulares</option>
+                                <option value="irregulares">Irregulares</option>
+                                <option value="erosivas">Erosivas</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Superfície</label>
-                            <input type="text" class="superficie-lesao" placeholder="Lisa, descamativa, crostosa">
+                            <select class="superficie-lesao" onchange="gerarHDeConduta()">
+                                <option value="">Selecione</option>
+                                <option value="lisa">Lisa</option>
+                                <option value="descamativa">Descamativa</option>
+                                <option value="crostosa">Crostosa</option>
+                                <option value="verrucosa">Verrucosa</option>
+                                <option value="ulcerada">Ulcerada</option>
+                                <option value="papilomatosa">Papilomatosa</option>
+                                <option value="atrófica">Atrófica</option>
+                                <option value="brilhante">Brilhante</option>
+                                <option value="fina">Fina</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label>Distribuição</label>
-                            <input type="text" class="distribuicao-lesao" placeholder="Simétrica, localizada, disseminada">
+                            <select class="distribuicao-lesao" onchange="gerarHDeConduta()">
+                                <option value="">Selecione</option>
+                                <option value="localizada">Localizada</option>
+                                <option value="disseminada">Disseminada</option>
+                                <option value="generalizada">Generalizada</option>
+                                <option value="simétrica">Simétrica</option>
+                                <option value="assimétrica">Assimétrica</option>
+                                <option value="fotoexposta">Áreas fotoexpostas</option>
+                                <option value="flexoras">Flexoras</option>
+                                <option value="extensoras">Extensoras</option>
+                                <option value="intertriginosa">Intertriginosa</option>
+                                <option value="segmentar">Segmentar</option>
+                                <option value="zosteriforme">Zosteriforme</option>
+                                <option value="acral">Acral</option>
+                                <option value="centrífuga">Centrífuga</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -577,25 +647,63 @@
 
             <h3>6.3 Sinais Dermatológicos Específicos</h3>
             <div class="sinais-especificos">
-                <div class="checkbox-item"><input type="checkbox" value="Darier"> Sinal de Darier (mastocitose)</div>
-                <div class="checkbox-item"><input type="checkbox" value="Koebner"> Sinal de Koebner</div>
-                <div class="checkbox-item"><input type="checkbox" value="Patergia"> Patergia</div>
-                <div class="checkbox-item"><input type="checkbox" value="Zireli"> Sinal de Zireli</div>
+                <div class="checkbox-item"><input type="checkbox" value="Darier" onchange="gerarHDeConduta()"> Sinal de Darier (mastocitose)</div>
+                <div class="checkbox-item"><input type="checkbox" value="Koebner" onchange="gerarHDeConduta()"> Sinal de Koebner (isomórfico)</div>
+                <div class="checkbox-item"><input type="checkbox" value="Patergia" onchange="gerarHDeConduta()"> Patergia</div>
+                <div class="checkbox-item"><input type="checkbox" value="Zireli" onchange="gerarHDeConduta()"> Sinal de Zireli</div>
+                <div class="checkbox-item"><input type="checkbox" value="Nikolsky" onchange="gerarHDeConduta()"> Sinal de Nikolsky</div>
+                <div class="checkbox-item"><input type="checkbox" value="Auspitz" onchange="gerarHDeConduta()"> Sinal de Auspitz</div>
+                <div class="checkbox-item"><input type="checkbox" value="Dermatografismo" onchange="gerarHDeConduta()"> Dermatografismo</div>
             </div>
 
-            <h3>6.4 Fâneros (Unhas, Cabelos, Pelos)</h3>
+            <h3>6.4 Fâneros</h3>
             <div class="grid-3">
                 <div class="form-group">
                     <label>Unhas</label>
-                    <input type="text" id="unhas" placeholder="Coiloníquia, pitting, onicólise...">
+                    <select id="unhas" onchange="gerarHDeConduta()">
+                        <option value="">Selecione</option>
+                        <option value="Normais">Normais</option>
+                        <option value="Coiloníquia">Coiloníquia (unha em colher)</option>
+                        <option value="Pitting">Pitting (depressões puntiformes)</option>
+                        <option value="Onicólise">Onicólise</option>
+                        <option value="Onicomicose">Onicomicose</option>
+                        <option value="Unhas de Plummer">Unhas de Plummer</option>
+                        <option value="Unhas de Terry">Unhas de Terry</option>
+                        <option value="Unhas de Lindsay">Unhas de Lindsay</option>
+                        <option value="Hipocratismo digital">Hipocratismo digital</option>
+                        <option value="Leuconíquia">Leuconíquia</option>
+                        <option value="Melanoníquia">Melanoníquia</option>
+                        <option value="Hemorrhagia em estilha">Hemorragia em estilha</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Cabelos/Pelos</label>
-                    <input type="text" id="cabelos" placeholder="Alopecia, hipertricose, hirsutismo...">
+                    <select id="cabelos" onchange="gerarHDeConduta()">
+                        <option value="">Selecione</option>
+                        <option value="Normais">Normais</option>
+                        <option value="Alopecia androgenética">Alopecia androgenética</option>
+                        <option value="Alopecia areata">Alopecia areata</option>
+                        <option value="Eflúvio telógeno">Eflúvio telógeno</option>
+                        <option value="Hipertricose">Hipertricose</option>
+                        <option value="Hirsutismo">Hirsutismo</option>
+                        <option value="Pili torti">Pili torti</option>
+                        <option value="Moniletrix">Moniletrix</option>
+                        <option value="Tricorrexe nodosa">Tricorrexe nodosa</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Mucosas</label>
-                    <input type="text" id="mucosas" placeholder="Enantema, lesões...">
+                    <select id="mucosas" onchange="gerarHDeConduta()">
+                        <option value="">Selecione</option>
+                        <option value="Normais">Normais</option>
+                        <option value="Enantema">Enantema</option>
+                        <option value="Placas esbranquiçadas">Placas esbranquiçadas</option>
+                        <option value="Lesões erosivas">Lesões erosivas</option>
+                        <option value="Úlceras">Úlceras</option>
+                        <option value="Leucoplasia">Leucoplasia</option>
+                        <option value="Eritroplasia">Eritroplasia</option>
+                        <option value="Telangiectasias">Telangiectasias</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -603,35 +711,34 @@
         <!-- Hipóteses e Conduta -->
         <div class="card">
             <h2>7. Hipóteses Diagnósticas</h2>
-            <div class="form-group">
-                <label>Hipótese Principal</label>
-                <input type="text" id="hipotesePrincipal" placeholder="Ex: Psoríase em placas">
-            </div>
-            <div class="form-group">
-                <label>Diagnóstico Diferencial (2-3 possibilidades)</label>
-                <textarea id="diagnosticoDiferencial" placeholder="Ex: Eczema crônico, Pitiríase rubra pilar..."></textarea>
+            <div id="hdDisplay" class="hd-display">
+                <strong>Hipótese Diagnóstica:</strong> Aguardando informações...<br>
+                <strong>Diagnóstico(s) Diferencial(is):</strong> --
             </div>
 
             <h2>8. Conduta</h2>
-            <button class="btn btn-info" onclick="gerarConduta()">⚕️ Gerar Conduta Baseada em Evidências</button>
+            <button class="btn btn-info" onclick="gerarCondutaManual()">⚕️ Atualizar Conduta</button>
             
-            <div id="condutaGerada" class="conduta-display" style="display:none;"></div>
-
-            <div class="form-group">
-                <label>Exames Complementares Solicitados</label>
-                <div class="checkbox-group">
-                    <div class="checkbox-item"><input type="checkbox" value="Micológico direto"> Micológico direto</div>
-                    <div class="checkbox-item"><input type="checkbox" value="Baciloscopia"> Baciloscopia</div>
-                    <div class="checkbox-item"><input type="checkbox" value="Biópsia de pele"> Biópsia de pele</div>
-                    <div class="checkbox-item"><input type="checkbox" value="Dermatoscopia"> Dermatoscopia</div>
-                    <div class="checkbox-item"><input type="checkbox" value="Sorologias"> Sorologias</div>
-                    <div class="checkbox-item"><input type="checkbox" value="Hemograma"> Hemograma</div>
-                </div>
+            <div id="condutaGerada" class="conduta-display">
+                <strong>Conduta baseada em evidências será gerada automaticamente...</strong>
             </div>
 
             <div class="form-group">
-                <label>Orientações Gerais</label>
-                <textarea id="orientacoes" placeholder="Cuidados com a pele, fotoproteção..."></textarea>
+                <label>Exames Complementares</label>
+                <div class="checkbox-group" id="exames">
+                    <div class="checkbox-item"><input type="checkbox" value="Micológico direto" onchange="gerarCondutaManual()"> Micológico direto</div>
+                    <div class="checkbox-item"><input type="checkbox" value="Baciloscopia" onchange="gerarCondutaManual()"> Baciloscopia</div>
+                    <div class="checkbox-item"><input type="checkbox" value="Biópsia de pele" onchange="gerarCondutaManual()"> Biópsia de pele</div>
+                    <div class="checkbox-item"><input type="checkbox" value="Dermatoscopia" onchange="gerarCondutaManual()"> Dermatoscopia</div>
+                    <div class="checkbox-item"><input type="checkbox" value="Sorologias" onchange="gerarCondutaManual()"> Sorologias (HIV, sífilis, hepatites)</div>
+                    <div class="checkbox-item"><input type="checkbox" value="Hemograma" onchange="gerarCondutaManual()"> Hemograma</div>
+                    <div class="checkbox-item"><input type="checkbox" value="PCR/VHS" onchange="gerarCondutaManual()"> PCR/VHS</div>
+                    <div class="checkbox-item"><input type="checkbox" value="Glicemia" onchange="gerarCondutaManual()"> Glicemia</div>
+                    <div class="checkbox-item"><input type="checkbox" value="Função tireoidiana" onchange="gerarCondutaManual()"> Função tireoidiana</div>
+                    <div class="checkbox-item"><input type="checkbox" value="Autoanticorpos" onchange="gerarCondutaManual()"> Autoanticorpos (FAN, anti-DNA)</div>
+                    <div class="checkbox-item"><input type="checkbox" value="Cultura bacteriana" onchange="gerarCondutaManual()"> Cultura bacteriana</div>
+                    <div class="checkbox-item"><input type="checkbox" value="Imunofluorescência" onchange="gerarCondutaManual()"> Imunofluorescência</div>
+                </div>
             </div>
         </div>
 
@@ -649,7 +756,7 @@
         </div>
         
         <footer>
-            Baseado nos documentos: Roteiro Detalhado de Consulta Dermatológica, E-book Semiologia Dermatológica e Capítulo 9
+            Baseado em guidelines da Sociedade Brasileira de Dermatologia e literatura médica atualizada
         </footer>
     </div>
 
@@ -690,10 +797,10 @@
             const novoMed = document.createElement('div');
             novoMed.className = 'medicamento-item';
             novoMed.innerHTML = `
-                <input type="text" placeholder="Nome" class="med-nome">
-                <input type="text" placeholder="Dose" class="med-dose">
-                <input type="text" placeholder="Tempo de uso" class="med-tempo">
-                <input type="text" placeholder="Indicação" class="med-indicacao">
+                <input type="text" placeholder="Nome" class="med-nome" onchange="gerarHDeConduta()">
+                <input type="text" placeholder="Dose" class="med-dose" onchange="gerarHDeConduta()">
+                <input type="text" placeholder="Tempo de uso" class="med-tempo" onchange="gerarHDeConduta()">
+                <input type="text" placeholder="Indicação" class="med-indicacao" onchange="gerarHDeConduta()">
             `;
             container.appendChild(novoMed);
         }
@@ -706,7 +813,7 @@
                 <div class="grid-2">
                     <div class="form-group">
                         <label>Tipo de lesão</label>
-                        <select class="tipo-lesao">
+                        <select class="tipo-lesao" onchange="gerarHDeConduta()">
                             <option value="">Selecione</option>
                             <optgroup label="Conteúdo Líquido">
                                 <option value="vesícula">Vesícula (&lt;1cm)</option>
@@ -750,130 +857,191 @@
                     </div>
                     <div class="form-group">
                         <label>Cor</label>
-                        <input type="text" class="cor-lesao" placeholder="Eritematosa, violácea, acastanhada...">
+                        <select class="cor-lesao" onchange="gerarHDeConduta()">
+                            <option value="">Selecione</option>
+                            <option value="eritematosa">Eritematosa</option>
+                            <option value="violácea">Violácea</option>
+                            <option value="acastanhada">Acastanhada</option>
+                            <option value="hipocrômica">Hipocrômica</option>
+                            <option value="hipercrômica">Hipercrômica</option>
+                            <option value="amarelada">Amarelada</option>
+                            <option value="esbranquiçada">Esbranquiçada</option>
+                            <option value="enegrecida">Enegrecida</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Forma</label>
-                        <input type="text" class="forma-lesao" placeholder="Circular, anular, linear, irregular">
+                        <select class="forma-lesao" onchange="gerarHDeConduta()">
+                            <option value="">Selecione</option>
+                            <option value="circular">Circular</option>
+                            <option value="anular">Anular</option>
+                            <option value="linear">Linear</option>
+                            <option value="irregular">Irregular</option>
+                            <option value="zosteriforme">Zosteriforme</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Bordas</label>
-                        <select class="bordas-lesao">
+                        <select class="bordas-lesao" onchange="gerarHDeConduta()">
                             <option value="nítidas">Nítidas</option>
                             <option value="mal definidas">Mal definidas</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Superfície</label>
-                        <input type="text" class="superficie-lesao" placeholder="Lisa, descamativa, crostosa">
+                        <select class="superficie-lesao" onchange="gerarHDeConduta()">
+                            <option value="">Selecione</option>
+                            <option value="lisa">Lisa</option>
+                            <option value="descamativa">Descamativa</option>
+                            <option value="crostosa">Crostosa</option>
+                            <option value="verrucosa">Verrucosa</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Distribuição</label>
-                        <input type="text" class="distribuicao-lesao" placeholder="Simétrica, localizada, disseminada">
+                        <select class="distribuicao-lesao" onchange="gerarHDeConduta()">
+                            <option value="">Selecione</option>
+                            <option value="localizada">Localizada</option>
+                            <option value="disseminada">Disseminada</option>
+                            <option value="simétrica">Simétrica</option>
+                            <option value="fotoexposta">Áreas fotoexpostas</option>
+                            <option value="flexoras">Flexoras</option>
+                            <option value="extensoras">Extensoras</option>
+                        </select>
                     </div>
                 </div>
             `;
             container.appendChild(novaLesao);
         }
 
-        function gerarHDA() {
-            const queixa = document.getElementById('queixa').value || 'sem queixa principal definida';
-            const inicio = document.getElementById('inicio').value || 'não especificado';
-            const evolucao = document.getElementById('evolucao').value || 'não especificada';
-            const localInicial = document.getElementById('localInicial').value || 'não especificada';
-            const recorrencia = document.getElementById('recorrencia').value;
-            const contato = document.getElementById('contatoFamiliar').value;
+        function gerarHDeConduta() {
+            const hipotese = gerarHipoteseDiagnostica();
+            const diagnosticoDiferencial = gerarDiagnosticoDiferencial();
             
-            // Sintomas associados
-            const sintomas = [];
-            document.querySelectorAll('#hdaGerada ~ * input[type="checkbox"]:checked').forEach(cb => {
-                if (cb.closest('.form-group') && cb.closest('.form-group').querySelector('label')?.innerText === 'Sintomas Associados') {
-                    sintomas.push(cb.value);
-                }
-            });
+            document.getElementById('hdDisplay').innerHTML = `
+                <strong>Hipótese Diagnóstica:</strong> ${hipotese}<br>
+                <strong>Diagnóstico(s) Diferencial(is):</strong> ${diagnosticoDiferencial}
+            `;
             
-            // Fatores
-            const fatores = [];
-            document.querySelectorAll('#hdaGerada ~ * input[type="checkbox"]:checked').forEach(cb => {
-                if (cb.closest('.form-group') && cb.closest('.form-group').querySelector('label')?.innerText === 'Fatores de melhora/piora') {
-                    fatores.push(cb.value);
-                }
-            });
-            
-            const tratamentos = document.getElementById('tratamentosPrevios').value;
-            
-            let hda = `Paciente relata ${queixa}. `;
-            hda += `Início ${inicio}, com evolução caracterizada por ${evolucao}. `;
-            hda += `Localização inicial: ${localInicial}. `;
-            
-            if (sintomas.length > 0) {
-                hda += `Sintomas associados: ${sintomas.join(', ')}. `;
-            }
-            
-            if (fatores.length > 0) {
-                hda += `Fatores que influenciam: ${fatores.join(', ')}. `;
-            }
-            
-            if (tratamentos) {
-                hda += `Tratamentos prévios realizados: ${tratamentos}. `;
-            }
-            
-            if (recorrencia) {
-                hda += `Recorrência: ${recorrencia}. `;
-            }
-            
-            if (contato) {
-                hda += `Contato familiar/domiciliar: ${contato}. `;
-            }
-            
-            const hdaDisplay = document.getElementById('hdaGerada');
-            hdaDisplay.style.display = 'block';
-            hdaDisplay.innerHTML = `<strong>HDA Gerada:</strong> ${hda}`;
+            gerarCondutaAutomatica(hipotese);
         }
 
-        function gerarConduta() {
-            const hipotese = document.getElementById('hipotesePrincipal').value || 'a ser definida';
-            const orientacoes = document.getElementById('orientacoes').value || '';
+        function gerarHipoteseDiagnostica() {
+            const lesoes = document.querySelectorAll('.lesao-card');
+            const sintomas = Array.from(document.querySelectorAll('#sintomas input:checked')).map(cb => cb.value);
+            const localizacao = document.getElementById('localInicial').value;
+            const tempo = document.getElementById('tempoEvolucao').value;
+            const fatoresPiora = Array.from(document.querySelectorAll('#piora input:checked')).map(cb => cb.value);
+            
+            let hipotese = "Em investigação";
+            
+            // Lógica para gerar hipótese baseada nos achados
+            if (lesoes.length > 0) {
+                const tipoLesao = lesoes[0].querySelector('.tipo-lesao')?.value || '';
+                
+                if (tipoLesao.includes('placa') && tipoLesao.includes('descamativa') && sintomas.includes('prurido')) {
+                    hipotese = "Psoríase em placas";
+                } else if (tipoLesao.includes('vesícula') && localizacao.includes('herpes')) {
+                    hipotese = "Herpes simplex / Herpes zoster";
+                } else if (tipoLesao.includes('mácula hipocrômica') && localizacao.includes('tronco')) {
+                    hipotese = "Pitiríase versicolor";
+                } else if (tipoLesao.includes('pápula') && localizacao.includes('face') && fatoresPiora.includes('exposição solar')) {
+                    hipotese = "Melasma / Ceratose actínica";
+                } else if (tipoLesao.includes('urtica') && sintomas.includes('prurido intenso')) {
+                    hipotese = "Urticária";
+                } else if (tipoLesao.includes('liquenificação') && fatoresPiora.includes('estresse')) {
+                    hipotese = "Dermatite atópica / Eczema crônico";
+                } else if (tipoLesao.includes('pústula') && localizacao.includes('face')) {
+                    hipotese = "Acne vulgar";
+                } else if (tipoLesao.includes('nódulo')) {
+                    hipotese = "Neoplasia cutânea a esclarecer";
+                } else {
+                    hipotese = "Dermatose inflamatória inespecífica";
+                }
+            }
+            
+            return hipotese;
+        }
+
+        function gerarDiagnosticoDiferencial() {
+            const hipotese = gerarHipoteseDiagnostica();
+            
+            const diferenciais = {
+                "Psoríase em placas": "Dermatite seborreica, Líquen plano, Pitiríase rubra pilar, Eczema crônico",
+                "Herpes simplex / Herpes zoster": "Impetigo, Dermatite de contato, Varicela, Estomatite aftosa",
+                "Pitiríase versicolor": "Vitiligo, Pitiríase alba, Hanseníase indeterminada, Hipocromia pós-inflamatória",
+                "Melasma / Ceratose actínica": "Lentigo solar, Melanose, Nevus, Carcinoma basocelular superficial",
+                "Urticária": "Dermatografismo, Urticária vasculite, Eritema multiforme, Mastocitose",
+                "Dermatite atópica / Eczema crônico": "Dermatite de contato, Psoríase, Ictiose, Líquen simples crônico",
+                "Acne vulgar": "Rosácea, Foliculite, Dermatite perioral, Hiperplasia sebácea",
+                "Neoplasia cutânea a esclarecer": "Ceratose actínica, Ceratoacantoma, Nevus atípico, Dermatofibroma"
+            };
+            
+            return diferenciais[hipotese] || "Considerar outras dermatoses inflamatórias, infecciosas ou neoplásicas";
+        }
+
+        function gerarCondutaAutomatica(hipotese) {
+            const examesSelecionados = Array.from(document.querySelectorAll('#exames input:checked')).map(cb => cb.value);
             
             let conduta = `**CONDUTA BASEADA EM EVIDÊNCIAS**\n\n`;
             conduta += `Com base na hipótese diagnóstica de "${hipotese}", recomenda-se:\n\n`;
+            
+            // Orientações gerais (sempre presentes)
             conduta += `1. **ORIENTAÇÕES GERAIS DE CUIDADO CUTÂNEO:**\n`;
-            conduta += `   • Limpeza suave com sabonetes syndet ou neutros\n`;
-            conduta += `   • Hidratação diária com cremes/loções emolientes\n`;
-            conduta += `   • Fotoproteção rigorosa com FPS ≥ 30, reaplicar a cada 3-4h\n`;
-            conduta += `   • Evitar fatores desencadeantes identificados\n`;
-            conduta += `   • Orientar sobre a doença e cronograma de tratamento\n\n`;
+            conduta += `   • Limpeza suave com sabonetes syndet ou neutros, evitar banhos muito quentes\n`;
+            conduta += `   • Hidratação diária com cremes/loções emolientes, principalmente pós-banho\n`;
+            conduta += `   • Fotoproteção rigorosa com FPS ≥ 30, reaplicar a cada 3-4h, evitar exposição solar excessiva\n`;
+            conduta += `   • Evitar fatores desencadeantes identificados (estresse, alimentos, tecidos sintéticos)\n`;
+            conduta += `   • Orientar sobre a doença, cronograma de tratamento e sinais de alerta\n\n`;
             
-            conduta += `2. **TRATAMENTO FARMACOLÓGICO (a individualizar):**\n`;
-            conduta += `   • Considerar corticoides tópicos de potência adequada à área\n`;
-            conduta += `   • Se infecção: antibióticos/antifúngicos tópicos ou sistêmicos\n`;
-            conduta += `   • Se prurido intenso: anti-histamínicos orais\n`;
-            conduta += `   • Em casos inflamatórios: imunomoduladores tópicos (tacrolimo/pimecrolimo)\n`;
-            conduta += `   • Se hiperqueratose: queratolíticos (ureia, ácido salicílico)\n\n`;
+            // Orientações específicas por hipótese
+            conduta += `2. **TRATAMENTO ESPECÍFICO:**\n`;
             
-            conduta += `3. **EXAMES COMPLEMENTARES:**\n`;
-            let examesSelecionados = false;
-            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-                if (cb.closest('.form-group') && cb.closest('.form-group').querySelector('label')?.innerText === 'Exames Complementares Solicitados') {
-                    conduta += `   • ${cb.value}\n`;
-                    examesSelecionados = true;
-                }
-            });
-            if (!examesSelecionados) {
+            if (hipotese.includes("Psoríase")) {
+                conduta += `   • Corticoides tópicos de média/alta potência (ex: betametasona, clobetasol) em ciclos\n`;
+                conduta += `   • Análogos de vitamina D (calcipotriol) associados ou isolados\n`;
+                conduta += `   • Em casos extensos: fototerapia ou imunobiológicos\n`;
+            } else if (hipotese.includes("Herpes")) {
+                conduta += `   • Antivirais sistêmicos: aciclovir 400mg 5x/dia ou valaciclovir 1g 2x/dia por 7-10 dias\n`;
+                conduta += `   • Antissépticos tópicos e analgésicos se necessário\n`;
+            } else if (hipotese.includes("Pitiríase versicolor")) {
+                conduta += `   • Antifúngicos tópicos: cetoconazol, clotrimazol ou terbinafina creme por 2-4 semanas\n`;
+                conduta += `   • Casos extensos: itraconazol ou fluconazol via oral\n`;
+            } else if (hipotese.includes("Melasma")) {
+                conduta += `   • Fotoproteção rigorosa com protetor físico\n`;
+                conduta += `   • Clareadores tópicos: hidroquinona, ácido retinóico, ácido azeláico\n`;
+            } else if (hipotese.includes("Urticária")) {
+                conduta += `   • Anti-histamínicos não sedantes: loratadina, desloratadina, fexofenadina\n`;
+                conduta += `   • Evitar fatores desencadeantes e uso de AAS\n`;
+            } else if (hipotese.includes("Dermatite atópica")) {
+                conduta += `   • Corticoides tópicos de baixa potência em áreas sensíveis\n`;
+                conduta += `   • Imunomoduladores tópicos (tacrolimo/pimecrolimo) como poupadores de corticoide\n`;
+                conduta += `   • Hidratação intensiva e evitar banhos quentes\n`;
+            } else if (hipotese.includes("Acne")) {
+                conduta += `   • Peróxido de benzoíla + clindamicina tópica para lesões inflamatórias\n`;
+                conduta += `   • Retinoides tópicos (adapaleno, tretinoína) para comedões\n`;
+                conduta += `   • Casos moderados/graves: isotretinoína oral ou antibióticos sistêmicos\n`;
+            } else {
+                conduta += `   • Tratamento a ser definido após confirmação diagnóstica\n`;
+            }
+            
+            conduta += `\n3. **EXAMES COMPLEMENTARES:**\n`;
+            if (examesSelecionados.length > 0) {
+                examesSelecionados.forEach(exame => conduta += `   • ${exame}\n`);
+            } else {
                 conduta += `   • Nenhum exame solicitado no momento\n`;
             }
             
-            if (orientacoes) {
-                conduta += `\n4. **ORIENTAÇÕES ESPECÍFICAS:**\n   ${orientacoes}\n`;
-            }
-            
-            conduta += `\n5. **RETORNO:**\n`;
+            conduta += `\n4. **RETORNO:**\n`;
             conduta += `   • Agendar retorno em 30-60 dias para reavaliação\n`;
             conduta += `   • Retornar antes se piora dos sintomas, sinais de infecção ou reações adversas`;
             
-            const condutaDisplay = document.getElementById('condutaGerada');
-            condutaDisplay.style.display = 'block';
-            condutaDisplay.innerHTML = conduta.replace(/\n/g, '<br>');
+            document.getElementById('condutaGerada').innerHTML = conduta.replace(/\n/g, '<br>');
+        }
+
+        function gerarCondutaManual() {
+            const hipotese = document.getElementById('hdDisplay').innerHTML.split('Hipótese Diagnóstica:</strong>')[1]?.split('<br>')[0]?.trim() || "Em investigação";
+            gerarCondutaAutomatica(hipotese);
         }
 
         function gerarRelatorioCompleto() {
@@ -885,8 +1053,6 @@
             const sexo = document.getElementById('sexo').value || 'Não informado';
             const peso = document.getElementById('peso').value || 'Não informado';
             const altura = document.getElementById('altura').value || 'Não informado';
-            const profissao = document.getElementById('profissao').value || 'Não informada';
-            const procedencia = document.getElementById('procedencia').value || 'Não informada';
             const dataConsulta = document.getElementById('dataConsulta').value || new Date().toLocaleDateString();
             
             relatorio += `**IDENTIFICAÇÃO**\n`;
@@ -897,7 +1063,6 @@
                 const classificacao = classificarIMC(parseFloat(imc));
                 relatorio += `IMC: ${imc} kg/m² (${classificacao})\n`;
             }
-            relatorio += `Profissão: ${profissao} | Procedência: ${procedencia}\n`;
             relatorio += `Data da consulta: ${dataConsulta}\n\n`;
             
             // Queixa Principal
@@ -906,83 +1071,57 @@
             
             // Antecedentes
             relatorio += `**ANTECEDENTES PESSOAIS**\n`;
-            const dermPrevias = [];
-            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-                if (cb.closest('.form-group') && cb.closest('.form-group').querySelector('label')?.innerText === 'Antecedentes Pessoais Dermatológicos') {
-                    dermPrevias.push(cb.value);
-                }
-            });
+            const dermPrevias = Array.from(document.querySelectorAll('#dermatologicos input:checked')).map(cb => cb.value);
             relatorio += `Dermatológicos: ${dermPrevias.length > 0 ? dermPrevias.join(', ') : 'Nenhum'}\n`;
             
-            const clinPrevios = [];
-            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-                if (cb.closest('.form-group') && cb.closest('.form-group').querySelector('label')?.innerText === 'Antecedentes Clínicos') {
-                    clinPrevios.push(cb.value);
-                }
-            });
+            const clinPrevios = Array.from(document.querySelectorAll('#clinicos input:checked')).map(cb => cb.value);
             relatorio += `Clínicos: ${clinPrevios.length > 0 ? clinPrevios.join(', ') : 'Nenhum'}\n`;
             
             const alergias = document.getElementById('alergias').value;
             if (alergias) relatorio += `Alergias: ${alergias}\n`;
             
-            const exposicao = document.getElementById('exposicaoSolar').value;
-            if (exposicao) relatorio += `Exposição solar: ${exposicao}\n`;
-            
             const habitos = document.getElementById('habitos').value;
             if (habitos) relatorio += `Hábitos: ${habitos}\n`;
             relatorio += `\n`;
             
-            // Medicamentos
-            relatorio += `**MEDICAMENTOS EM USO**\n`;
-            const medicamentos = document.querySelectorAll('.medicamento-item');
-            if (medicamentos.length > 0) {
-                medicamentos.forEach((med, index) => {
-                    const nome = med.querySelector('.med-nome')?.value || 'Não informado';
-                    const dose = med.querySelector('.med-dose')?.value || '';
-                    const tempo = med.querySelector('.med-tempo')?.value || '';
-                    const indicacao = med.querySelector('.med-indicacao')?.value || '';
-                    if (nome !== 'Não informado' && nome !== '') {
-                        relatorio += `• ${nome}`;
-                        if (dose) relatorio += ` - ${dose}`;
-                        if (tempo) relatorio += ` - ${tempo}`;
-                        if (indicacao) relatorio += ` (${indicacao})`;
-                        relatorio += `\n`;
-                    }
-                });
-            } else {
-                relatorio += `Nenhum medicamento informado\n`;
-            }
-            relatorio += `\n`;
-            
             // HDA
-            const hdaDisplay = document.getElementById('hdaGerada');
-            if (hdaDisplay.style.display !== 'none' && hdaDisplay.innerHTML) {
-                relatorio += `**HISTÓRIA DA DOENÇA ATUAL**\n`;
-                relatorio += hdaDisplay.innerText + '\n\n';
-            }
+            const tempo = document.getElementById('tempoEvolucao').value;
+            const inicio = document.getElementById('inicio').value;
+            const localInicial = document.getElementById('localInicial').value;
+            const sintomas = Array.from(document.querySelectorAll('#sintomas input:checked')).map(cb => cb.value);
+            const melhora = Array.from(document.querySelectorAll('#melhora input:checked')).map(cb => cb.value);
+            const piora = Array.from(document.querySelectorAll('#piora input:checked')).map(cb => cb.value);
+            
+            relatorio += `**HISTÓRIA DA DOENÇA ATUAL**\n`;
+            if (tempo) relatorio += `Tempo de evolução: ${tempo}\n`;
+            if (inicio) relatorio += `Início: ${inicio}\n`;
+            if (localInicial) relatorio += `Localização inicial: ${localInicial}\n`;
+            if (sintomas.length > 0) relatorio += `Sintomas: ${sintomas.join(', ')}\n`;
+            if (melhora.length > 0) relatorio += `Fatores de melhora: ${melhora.join(', ')}\n`;
+            if (piora.length > 0) relatorio += `Fatores de piora: ${piora.join(', ')}\n`;
+            relatorio += `\n`;
             
             // Exame Físico
             relatorio += `**EXAME FÍSICO DERMATOLÓGICO**\n`;
-            relatorio += `• Cor: ${document.getElementById('corPele').value || 'Não informada'}\n`;
-            relatorio += `• Textura: ${document.getElementById('textura').value || 'Não informada'}\n`;
-            relatorio += `• Hidratação: ${document.getElementById('hidratacao').value || 'Não informada'}\n`;
-            relatorio += `• Turgor/Elasticidade: ${document.getElementById('turgor').value || 'Não informado'}\n\n`;
+            relatorio += `Cor: ${document.getElementById('corPele').value || 'Não informada'}\n`;
+            relatorio += `Textura: ${document.getElementById('textura').value || 'Não informada'}\n`;
+            relatorio += `Hidratação: ${document.getElementById('hidratacao').value || 'Não informada'}\n`;
             
             // Lesões
-            relatorio += `**LESÕES ELEMENTARES**\n`;
             const lesoes = document.querySelectorAll('.lesao-card');
             if (lesoes.length > 0) {
+                relatorio += `\n**LESÕES ELEMENTARES**\n`;
                 lesoes.forEach((lesao, index) => {
-                    const tipo = lesao.querySelector('.tipo-lesao')?.value || 'Não informado';
-                    if (tipo !== 'Não informado' && tipo !== '') {
-                        const cor = lesao.querySelector('.cor-lesao')?.value || '';
-                        const forma = lesao.querySelector('.forma-lesao')?.value || '';
-                        const bordas = lesao.querySelector('.bordas-lesao')?.value || '';
-                        const superficie = lesao.querySelector('.superficie-lesao')?.value || '';
-                        const distribuicao = lesao.querySelector('.distribuicao-lesao')?.value || '';
-                        
+                    const tipo = lesao.querySelector('.tipo-lesao')?.value || '';
+                    const cor = lesao.querySelector('.cor-lesao')?.value || '';
+                    const forma = lesao.querySelector('.forma-lesao')?.value || '';
+                    const bordas = lesao.querySelector('.bordas-lesao')?.value || '';
+                    const superficie = lesao.querySelector('.superficie-lesao')?.value || '';
+                    const distribuicao = lesao.querySelector('.distribuicao-lesao')?.value || '';
+                    
+                    if (tipo) {
                         relatorio += `Lesão ${index+1}: ${tipo}`;
-                        if (cor) relatorio += `, cor ${cor}`;
+                        if (cor) relatorio += `, ${cor}`;
                         if (forma) relatorio += `, forma ${forma}`;
                         if (bordas) relatorio += `, bordas ${bordas}`;
                         if (superficie) relatorio += `, superfície ${superficie}`;
@@ -990,53 +1129,26 @@
                         relatorio += `\n`;
                     }
                 });
-            } else {
-                relatorio += `Nenhuma lesão descrita\n`;
             }
-            relatorio += `\n`;
             
             // Fâneros
             const unhas = document.getElementById('unhas').value;
             const cabelos = document.getElementById('cabelos').value;
             const mucosas = document.getElementById('mucosas').value;
             if (unhas || cabelos || mucosas) {
-                relatorio += `**FÂNEROS**\n`;
-                if (unhas) relatorio += `• Unhas: ${unhas}\n`;
-                if (cabelos) relatorio += `• Cabelos/Pelos: ${cabelos}\n`;
-                if (mucosas) relatorio += `• Mucosas: ${mucosas}\n`;
-                relatorio += `\n`;
+                relatorio += `\n**FÂNEROS**\n`;
+                if (unhas) relatorio += `Unhas: ${unhas}\n`;
+                if (cabelos) relatorio += `Cabelos/Pelos: ${cabelos}\n`;
+                if (mucosas) relatorio += `Mucosas: ${mucosas}\n`;
             }
             
             // Hipóteses
-            relatorio += `**HIPÓTESES DIAGNÓSTICAS**\n`;
-            relatorio += `Principal: ${document.getElementById('hipotesePrincipal').value || 'Não informada'}\n`;
-            relatorio += `Diagnóstico Diferencial: ${document.getElementById('diagnosticoDiferencial').value || 'Não informado'}\n\n`;
+            relatorio += `\n**HIPÓTESES DIAGNÓSTICAS**\n`;
+            relatorio += document.getElementById('hdDisplay').innerText + '\n\n';
             
             // Conduta
-            const condutaDisplay = document.getElementById('condutaGerada');
-            if (condutaDisplay.style.display !== 'none' && condutaDisplay.innerHTML) {
-                relatorio += `**CONDUTA**\n`;
-                relatorio += condutaDisplay.innerText + '\n\n';
-            }
-            
-            // Exames
-            const exames = [];
-            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-                if (cb.closest('.form-group') && cb.closest('.form-group').querySelector('label')?.innerText === 'Exames Complementares Solicitados') {
-                    exames.push(cb.value);
-                }
-            });
-            if (exames.length > 0) {
-                relatorio += `**EXAMES SOLICITADOS**\n`;
-                exames.forEach(exame => relatorio += `• ${exame}\n`);
-                relatorio += `\n`;
-            }
-            
-            // Orientações
-            const orientacoes = document.getElementById('orientacoes').value;
-            if (orientacoes) {
-                relatorio += `**ORIENTAÇÕES**\n${orientacoes}\n`;
-            }
+            relatorio += `**CONDUTA**\n`;
+            relatorio += document.getElementById('condutaGerada').innerText;
             
             const relatorioDiv = document.getElementById('relatorioCompleto');
             relatorioDiv.style.display = 'block';
@@ -1063,6 +1175,11 @@
                 location.reload();
             }
         }
+
+        // Inicializar com geração automática
+        window.onload = function() {
+            gerarHDeConduta();
+        };
     </script>
 </body>
-</html>
+    </html>
